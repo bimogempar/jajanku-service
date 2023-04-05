@@ -3,14 +3,11 @@ package routes
 import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/logger"
-	"github.com/joho/godotenv"
 	"github.com/maulanarisqimustofa/jajanku-project/modules/entities/user"
 	"gorm.io/gorm"
 )
 
 func InitRoute(db *gorm.DB) *fiber.App {
-	godotenv.Load(".env")
-
 	app := fiber.New()
 	app.Use(logger.New())
 
