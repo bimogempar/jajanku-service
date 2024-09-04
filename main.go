@@ -1,18 +1,34 @@
 package main
 
 import (
+	"jajanku_service/internal/config"
+	"jajanku_service/internal/modules/user"
+	"jajanku_service/internal/routes"
 	"log"
-	"os"
 
-	"github.com/joho/godotenv"
-	"github.com/maulanarisqimustofa/jajanku-project/app/config"
-	"github.com/maulanarisqimustofa/jajanku-project/modules/routes"
+	"github.com/gofiber/fiber/v2"
 )
 
 func main() {
-	godotenv.Load(".env")
+	conf, err := config.New()
+	app := fiber.New()
 
-	db := config.InitDB()
-	r := routes.InitRoute(db)
-	log.Fatal(r.Listen(os.Getenv("APP_PORT")))
+	db, err := config.InitDB(conf)
+	if err != nil {
+		log.Fatalf("failed connect db")
+	}
+
+	app.Get("/healthy", func(c *fiber.Ctx) error {
+		return c.Status(200).JSON(map[string]interface{}{
+			"status":  200,
+			"message": "Server running successfully",
+		})
+	})
+
+	userHandler := user.InitUser(db, conf.JWTConfig.SecretKey)
+
+	routes.UserRoutes(app, userHandler, conf.JWTConfig.SecretKey)
+
+	log.Println("api running on localhost:3000")
+	app.Listen(":3000")
 }
