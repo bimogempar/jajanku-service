@@ -2,6 +2,7 @@ package user
 
 import (
 	"errors"
+	"fmt"
 	"jajanku_service/domain"
 	"time"
 
@@ -22,6 +23,18 @@ func NewUserService(repo domain.UserRepository, secret string) domain.UserServic
 }
 
 func (s *UserServiceImpl) RegisterUser(user *domain.User) error {
+	if user.Role == "" {
+		user.Role = "user"
+	}
+
+	existUser, err := s.UserRepository.GetUserByEmail(user.Email)
+	if err != nil {
+		return err
+	}
+	if existUser != nil {
+		return fmt.Errorf("email %s already in use", existUser.Email)
+	}
+
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
 	if err != nil {
 		return err

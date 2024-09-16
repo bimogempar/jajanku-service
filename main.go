@@ -26,7 +26,6 @@ func main() {
 	})
 
 	userHandler := user.InitUser(db, conf.JWTConfig.SecretKey)
-
 	routes.UserRoutes(app, userHandler, conf.JWTConfig.SecretKey)
 
 	log.Println("api running on localhost:3000")
