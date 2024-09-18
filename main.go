@@ -1,33 +1,37 @@
 package main
 
 import (
+	"jajanku_service/internal"
 	"jajanku_service/internal/config"
-	"jajanku_service/internal/modules/user"
-	"jajanku_service/internal/routes"
+	"jajanku_service/internal/user"
 	"log"
 
 	"github.com/gofiber/fiber/v2"
 )
 
 func main() {
-	conf, err := config.New()
+	conf := config.LoadConfig()
 	app := fiber.New()
 
 	db, err := config.InitDB(conf)
 	if err != nil {
-		log.Fatalf("failed connect db")
+		log.Fatalf("failed connect db", err)
 	}
 
-	app.Get("/healthy", func(c *fiber.Ctx) error {
+	registry := internal.NewRegistry(db, conf)
+	if err != nil {
+		log.Fatalf("failed load registry", err)
+	}
+
+	userHandler := registry.NewUserHandler()
+	user.RegisterRouteUser(app, userHandler)
+
+	log.Println("api running on localhost:3000")
+	app.Get("/api/healthy", func(c *fiber.Ctx) error {
 		return c.Status(200).JSON(map[string]interface{}{
 			"status":  200,
 			"message": "Server running successfully",
 		})
 	})
-
-	userHandler := user.InitUser(db, conf.JWTConfig.SecretKey)
-	routes.UserRoutes(app, userHandler, conf.JWTConfig.SecretKey)
-
-	log.Println("api running on localhost:3000")
 	app.Listen(":3000")
 }

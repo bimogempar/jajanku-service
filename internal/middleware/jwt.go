@@ -1,13 +1,14 @@
 package middleware
 
 import (
+	"jajanku_service/internal/config"
 	"strings"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v5"
 )
 
-func JWTProtected(secret string) fiber.Handler {
+func JWTProtected() fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		authHeader := c.Get("Authorization")
 		if authHeader == "" {
@@ -25,7 +26,7 @@ func JWTProtected(secret string) fiber.Handler {
 			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 				return nil, fiber.NewError(fiber.StatusUnauthorized, "unexpected signing method")
 			}
-			return []byte(secret), nil
+			return []byte(config.LoadConfig().JWTSecret), nil
 		})
 
 		if err != nil || !token.Valid {
