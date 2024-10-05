@@ -2,7 +2,10 @@ package main
 
 import (
 	"jajanku_service/internal"
+	"jajanku_service/internal/category"
 	"jajanku_service/internal/config"
+	"jajanku_service/internal/product"
+	"jajanku_service/internal/routes"
 	"jajanku_service/internal/user"
 	"log"
 
@@ -14,6 +17,7 @@ func main() {
 	app := fiber.New()
 
 	db, err := config.InitDB(conf)
+	internal.RunMigration(db, &user.User{}, &product.Product{}, &category.Category{})
 	if err != nil {
 		log.Fatalf("failed connect db", err)
 	}
@@ -23,8 +27,7 @@ func main() {
 		log.Fatalf("failed load registry", err)
 	}
 
-	userHandler := registry.NewUserHandler()
-	user.RegisterRouteUser(app, userHandler)
+	routes.RegisterRoutes(app, registry)
 
 	log.Println("api running on localhost:3000")
 	app.Get("/api/healthy", func(c *fiber.Ctx) error {
@@ -33,5 +36,5 @@ func main() {
 			"message": "Server running successfully",
 		})
 	})
-	app.Listen(":3000")
+	app.Listen(":9999")
 }

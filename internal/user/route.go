@@ -6,9 +6,10 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-func RegisterRouteUser(app *fiber.App, handler *Handler) {
-	userRouteGroup := app.Group("/api")
-	userRouteGroup.Get("/users", middleware.JWTProtected(), handler.ListUsers)
+func RegisterRouteUser(group fiber.Router, app *fiber.App, handler *Handler) {
+	userRouteGroup := group.Group("/users")
+	userRouteGroup.Get("/", middleware.JWTProtected(), handler.ListUsers)
 	userRouteGroup.Post("/register", handler.Register)
 	userRouteGroup.Post("/login", handler.Login)
+	userRouteGroup.Get("/:id", handler.GetUser)
 }

@@ -26,6 +26,7 @@ func (h *Handler) Register(c *fiber.Ctx) error {
 		Email:    req.Email,
 		Password: req.Password,
 	})
+	
 	if err != nil {
 		return helpers.APIError(c, fiber.StatusInternalServerError, err)
 	}
